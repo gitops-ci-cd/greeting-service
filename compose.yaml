@@ -1,0 +1,65 @@
+services:
+  go: &go
+    env_file:
+      - path: .env
+        required: false
+    tty: true
+    stdin_open: true
+    build:
+      context: .
+      target: builder
+    entrypoint: go
+    command: help
+    volumes:
+      - .:/usr/src/app:delegated
+      - gomod:/go/pkg/mod:cached
+      - ${LOCAL_DEP_PATH:-..}:/local
+
+  app:
+    env_file:
+      - path: .env
+        required: false
+    tty: true
+    stdin_open: true
+    build:
+      context: .
+      target: builder
+    entrypoint: go
+    command: run ./cmd/server/main.go
+    ports:
+      - ${PORT:-8080}:${PORT:-8080}
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./cmd/
+          target: /usr/src/app/cmd/
+        - action: sync+restart
+          path: ./internal/
+          target: /usr/src/app/internal/
+        - action: sync+restart
+          path: ./web/
+          target: /usr/src/app/web/
+        - action: sync+restart
+          path: ./go.mod
+          target: /usr/src/app/go.mod
+        - action: sync+restart
+          path: ./go.sum
+          target: /usr/src/app/go.sum
+    volumes:
+      - gomod:/go/pkg/mod:cached
+
+  protoc:
+    image: ghcr.io/gitops-ci-cd/protoc:latest
+    entrypoint: protoc
+    command:
+      - --proto_path=./proto
+      - --go_opt=module=github.com/gitops-ci-cd/schema
+      - --go_out=./internal/gen/pb
+      - --go-grpc_opt=module=github.com/gitops-ci-cd/schema
+      - --go-grpc_out=./internal/gen/pb
+      - proto/**/*.proto
+    volumes:
+      - .:/usr/src/app:delegated
+
+volumes:
+  gomod: {}
