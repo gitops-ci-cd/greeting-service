@@ -1,0 +1,40 @@
+on:
+  push:
+    paths-ignore:
+      - .devcontainer/**
+      - .github/**
+      - .vscode/**
+      - .gitignore
+      - Brewfile
+      - README.md
+    branches:
+      - main
+
+permissions:
+  contents: write
+  packages: write
+  attestations: write
+  id-token: write
+  deployments: write
+
+name: Deployment
+
+jobs:
+  deploy:
+    name: Deploy
+    strategy:
+      matrix:
+        target: [production, sandbox]
+    uses: gitops-ci-cd/.github/.github/workflows/deploy.yaml@main
+    with:
+      environment: ${{ matrix.target }}
+
+  build:
+    needs: deploy
+    name: Build
+    uses: gitops-ci-cd/.github/.github/workflows/build.yaml@main
+
+  release:
+    needs: build
+    name: Release
+    uses: gitops-ci-cd/.github/.github/workflows/release.yaml@main
