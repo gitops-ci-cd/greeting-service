@@ -61,6 +61,10 @@ services:
     volumes:
       - .:/usr/src/app:delegated
 
+  install:
+    <<: *go
+    command: mod tidy
+
   lint:
     <<: *go
     command: vet ./...
