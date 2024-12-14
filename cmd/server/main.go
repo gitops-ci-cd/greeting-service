@@ -80,17 +80,11 @@ func run(port string) error {
 	return nil
 }
 
-func loggingInterceptor(
-	ctx context.Context,
-	req interface{},
-	info *grpc.UnaryServerInfo,
-	handler grpc.UnaryHandler,
-) (interface{}, error) {
+func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	start := time.Now()
 	res, err := handler(ctx, req)
 	duration := time.Since(start)
 
-	// Add more structured logging
 	slog.Info("Handled gRPC request",
 		"method", info.FullMethod,
 		"duration", duration.String(),

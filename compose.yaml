@@ -37,9 +37,6 @@ services:
           path: ./internal/
           target: /usr/src/app/internal/
         - action: sync+restart
-          path: ./web/
-          target: /usr/src/app/web/
-        - action: sync+restart
           path: ./go.mod
           target: /usr/src/app/go.mod
         - action: sync+restart

@@ -1,4 +1,3 @@
-# First stage: build the executable.
 # Start from the official Go image to create a build artifact.
 FROM golang:1.23 AS builder
 
@@ -17,9 +16,8 @@ RUN groupadd -r nonroot && useradd --no-log-init -r -g nonroot nonroot
 
 # Build the binary with full module support and without Cgo.
 # Compile the binary statically including all dependencies.
-RUN CGO_ENABLED=0 GOOS=linux && go build -mod=readonly -a -installsuffix cgo -o /go/bin/main cmd/server/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -mod=readonly -a -installsuffix cgo -o /go/bin/main ./cmd/server/main.go
 
-# Second stage: build the runtime container.
 # Start from a scratch image, which is an empty container.
 FROM scratch
 
@@ -38,7 +36,7 @@ COPY --from=builder /go/bin/main ./
 # Use the nonroot user to run the application
 USER nonroot:nonroot
 
-EXPOSE 8080
+EXPOSE 50051
 
 # Define the entry point for the docker image.
 # This is the command that will be run when the container starts.
