@@ -61,5 +61,13 @@ services:
     volumes:
       - .:/usr/src/app:delegated
 
+  lint:
+    <<: *go
+    command: vet ./...
+
+  test:
+    <<: *go
+    command: test ./...
+
 volumes:
   gomod: {}

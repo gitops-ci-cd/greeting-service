@@ -23,15 +23,8 @@ func main() {
 		port = ":50051"
 	}
 
-	// Create a TCP listener
-	listener, err := net.Listen("tcp", port)
-	if err != nil {
-		slog.Error("Unable to listen on port", "port", port, "error", err)
-		os.Exit(1)
-	}
-
 	// Run the server. Separated into a function to better facilitate testing
-	if err := run(port, listener); err != nil {
+	if err := run(port); err != nil {
 		slog.Error("Server terminated with error", "error", err)
 		os.Exit(1)
 	} else {
@@ -40,7 +33,21 @@ func main() {
 }
 
 // run sets up and starts the gRPC server
-func run(port string, listener net.Listener) error {
+func run(port string) error {
+	// Create a TCP listener
+	listener, err := net.Listen("tcp", port)
+	if err != nil {
+		if os.IsTimeout(err) {
+			slog.Error("Timeout while attempting to listen on port", "port", port)
+		} else if os.IsPermission(err) {
+			slog.Error("Permission denied for port", "port", port)
+		} else {
+			slog.Error("Port is already in use or other error", "port", port)
+		}
+		return err
+	}
+	defer listener.Close()
+
 	// Create a new gRPC server
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(loggingInterceptor),
