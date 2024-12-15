@@ -27,7 +27,7 @@ services:
     entrypoint: go
     command: run ./cmd/server/main.go
     ports:
-      - ${PORT:-8080}:${PORT:-8080}
+      - ${PORT:-50051}:${PORT:-50051}
     develop:
       watch:
         - action: sync+restart
