@@ -1,0 +1,36 @@
+.DS_Store
+
+# Ignore node files
+node_modules
+dist
+.cache
+
+# Ignore editor workspace files
+.sublime-*
+.atom
+.editorconfig
+.idea
+.nyc_output
+coverage
+*.lcov
+*.swp
+*.swo
+
+# Ignore all logfiles and tempfiles.
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+
+# Ignore version control
+.tool-versions
+.*-version
+.task
+
+# Ignore env
+/.env
+.env.local
+compose.override.yaml
+
+# Ignore brew
+Brewfile.lock.json
