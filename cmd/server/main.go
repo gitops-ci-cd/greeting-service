@@ -12,8 +12,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	pb "github.com/gitops-ci-cd/greeter/internal/gen/pb/v1"
-	"github.com/gitops-ci-cd/greeter/internal/greetings"
+	pb "github.com/gitops-ci-cd/greeting-service/internal/gen/pb/v1"
+	"github.com/gitops-ci-cd/greeting-service/internal/greetings"
 )
 
 func main() {
@@ -54,7 +54,7 @@ func run(port string) error {
 	)
 
 	// Register the Greeter service
-	pb.RegisterGreeterServer(server, greetings.NewGreeterHandler())
+	pb.RegisterGreetingServiceServer(server, greetings.NewGreeterHandler())
 
 	// Register reflection service for debugging
 	reflection.Register(server)

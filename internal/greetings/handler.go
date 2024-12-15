@@ -10,21 +10,21 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	pb "github.com/gitops-ci-cd/greeter/internal/gen/pb/v1"
+	pb "github.com/gitops-ci-cd/greeting-service/internal/gen/pb/v1"
 )
 
-// greeterHandler implements the GreeterServer interface.
-type greeterHandler struct {
-	pb.UnimplementedGreeterServer // Embedding for forward compatibility
+// greetingServiceHandler implements the GreetingServiceServer interface.
+type greetingServiceHandler struct {
+	pb.UnimplementedGreetingServiceServer // Embedding for forward compatibility
 }
 
-// NewGreeterHandler creates a new instance of greeterHandler.
-func NewGreeterHandler() pb.GreeterServer {
-	return &greeterHandler{}
+// NewGreeterHandler creates a new instance of greetingServiceHandler.
+func NewGreeterHandler() pb.GreetingServiceServer {
+	return &greetingServiceHandler{}
 }
 
 // Greeting handles an RPC request for a greeting.
-func (h *greeterHandler) Greeting(ctx context.Context, req *pb.GreetingRequest) (*pb.GreetingResponse, error) {
+func (h *greetingServiceHandler) Greeting(ctx context.Context, req *pb.GreetingRequest) (*pb.GreetingResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "request cannot be nil")
 	}

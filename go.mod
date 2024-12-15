@@ -1,4 +1,4 @@
-module github.com/gitops-ci-cd/greeter
+module github.com/gitops-ci-cd/greeting-service
 
 go 1.23.4
 

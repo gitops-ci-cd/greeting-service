@@ -21,101 +21,101 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Greeter_Greeting_FullMethodName = "/com.acme.schema.v1.Greeter/Greeting"
+	GreetingService_Fetch_FullMethodName = "/com.acme.schema.v1.GreetingService/Fetch"
 )
 
-// GreeterClient is the client API for Greeter service.
+// GreetingServiceClient is the client API for GreetingService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type GreeterClient interface {
-	Greeting(ctx context.Context, in *GreetingRequest, opts ...grpc.CallOption) (*GreetingResponse, error)
+type GreetingServiceClient interface {
+	Fetch(ctx context.Context, in *GreetingRequest, opts ...grpc.CallOption) (*GreetingResponse, error)
 }
 
-type greeterClient struct {
+type greetingServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewGreeterClient(cc grpc.ClientConnInterface) GreeterClient {
-	return &greeterClient{cc}
+func NewGreetingServiceClient(cc grpc.ClientConnInterface) GreetingServiceClient {
+	return &greetingServiceClient{cc}
 }
 
-func (c *greeterClient) Greeting(ctx context.Context, in *GreetingRequest, opts ...grpc.CallOption) (*GreetingResponse, error) {
+func (c *greetingServiceClient) Fetch(ctx context.Context, in *GreetingRequest, opts ...grpc.CallOption) (*GreetingResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GreetingResponse)
-	err := c.cc.Invoke(ctx, Greeter_Greeting_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, GreetingService_Fetch_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// GreeterServer is the server API for Greeter service.
-// All implementations must embed UnimplementedGreeterServer
+// GreetingServiceServer is the server API for GreetingService service.
+// All implementations must embed UnimplementedGreetingServiceServer
 // for forward compatibility.
-type GreeterServer interface {
-	Greeting(context.Context, *GreetingRequest) (*GreetingResponse, error)
-	mustEmbedUnimplementedGreeterServer()
+type GreetingServiceServer interface {
+	Fetch(context.Context, *GreetingRequest) (*GreetingResponse, error)
+	mustEmbedUnimplementedGreetingServiceServer()
 }
 
-// UnimplementedGreeterServer must be embedded to have
+// UnimplementedGreetingServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedGreeterServer struct{}
+type UnimplementedGreetingServiceServer struct{}
 
-func (UnimplementedGreeterServer) Greeting(context.Context, *GreetingRequest) (*GreetingResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Greeting not implemented")
+func (UnimplementedGreetingServiceServer) Fetch(context.Context, *GreetingRequest) (*GreetingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Fetch not implemented")
 }
-func (UnimplementedGreeterServer) mustEmbedUnimplementedGreeterServer() {}
-func (UnimplementedGreeterServer) testEmbeddedByValue()                 {}
+func (UnimplementedGreetingServiceServer) mustEmbedUnimplementedGreetingServiceServer() {}
+func (UnimplementedGreetingServiceServer) testEmbeddedByValue()                         {}
 
-// UnsafeGreeterServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to GreeterServer will
+// UnsafeGreetingServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to GreetingServiceServer will
 // result in compilation errors.
-type UnsafeGreeterServer interface {
-	mustEmbedUnimplementedGreeterServer()
+type UnsafeGreetingServiceServer interface {
+	mustEmbedUnimplementedGreetingServiceServer()
 }
 
-func RegisterGreeterServer(s grpc.ServiceRegistrar, srv GreeterServer) {
-	// If the following call pancis, it indicates UnimplementedGreeterServer was
+func RegisterGreetingServiceServer(s grpc.ServiceRegistrar, srv GreetingServiceServer) {
+	// If the following call pancis, it indicates UnimplementedGreetingServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&Greeter_ServiceDesc, srv)
+	s.RegisterService(&GreetingService_ServiceDesc, srv)
 }
 
-func _Greeter_Greeting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _GreetingService_Fetch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GreetingRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GreeterServer).Greeting(ctx, in)
+		return srv.(GreetingServiceServer).Fetch(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Greeter_Greeting_FullMethodName,
+		FullMethod: GreetingService_Fetch_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GreeterServer).Greeting(ctx, req.(*GreetingRequest))
+		return srv.(GreetingServiceServer).Fetch(ctx, req.(*GreetingRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Greeter_ServiceDesc is the grpc.ServiceDesc for Greeter service.
+// GreetingService_ServiceDesc is the grpc.ServiceDesc for GreetingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Greeter_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "com.acme.schema.v1.Greeter",
-	HandlerType: (*GreeterServer)(nil),
+var GreetingService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "com.acme.schema.v1.GreetingService",
+	HandlerType: (*GreetingServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Greeting",
-			Handler:    _Greeter_Greeting_Handler,
+			MethodName: "Fetch",
+			Handler:    _GreetingService_Fetch_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
