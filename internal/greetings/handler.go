@@ -24,7 +24,7 @@ func NewGreeterHandler() pb.GreetingServiceServer {
 }
 
 // Greeting handles an RPC request for a greeting.
-func (h *greetingServiceHandler) Greeting(ctx context.Context, req *pb.GreetingRequest) (*pb.GreetingResponse, error) {
+func (h *greetingServiceHandler) Fetch(ctx context.Context, req *pb.GreetingRequest) (*pb.GreetingResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "request cannot be nil")
 	}
