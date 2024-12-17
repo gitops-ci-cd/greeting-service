@@ -18,8 +18,8 @@ type greetingServiceHandler struct {
 	pb.UnimplementedGreetingServiceServer // Embedding for forward compatibility
 }
 
-// NewGreeterHandler creates a new instance of greetingServiceHandler.
-func NewGreeterHandler() pb.GreetingServiceServer {
+// NewGreetingServiceHandler creates a new instance of greetingServiceHandler.
+func NewGreetingServiceHandler() pb.GreetingServiceServer {
 	return &greetingServiceHandler{}
 }
 

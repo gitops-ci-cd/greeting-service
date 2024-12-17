@@ -53,8 +53,8 @@ func run(port string) error {
 		grpc.UnaryInterceptor(loggingInterceptor),
 	)
 
-	// Register the Greeter service
-	pb.RegisterGreetingServiceServer(server, greetings.NewGreeterHandler())
+	// Register the Greeting service with the server
+	pb.RegisterGreetingServiceServer(server, greetings.NewGreetingServiceHandler())
 
 	// Register reflection service for debugging
 	reflection.Register(server)
