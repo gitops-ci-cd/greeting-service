@@ -7,7 +7,7 @@ services:
     stdin_open: true
     build:
       context: .
-      target: builder
+      target: deps
     entrypoint: go
     command: help
     volumes:
@@ -23,7 +23,7 @@ services:
     stdin_open: true
     build:
       context: .
-      target: builder
+      target: deps
     entrypoint: go
     command: run ./cmd/server/main.go
     ports:
