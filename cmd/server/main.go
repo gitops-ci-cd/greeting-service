@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net"
 	"os"
@@ -93,7 +94,7 @@ func run(port string) error {
 func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	start := time.Now()
 
-	slog.Debug("gRPC request received", "method", info.FullMethod, "request", req)
+	slog.Debug("gRPC request received", "method", info.FullMethod, "request", fmt.Sprintf("%+v", req),)
 
 	// Process the request
 	res, err := handler(ctx, req)
