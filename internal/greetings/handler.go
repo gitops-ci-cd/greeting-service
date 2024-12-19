@@ -44,15 +44,17 @@ func (h *greetingServiceHandler) Fetch(ctx context.Context, req *pb.GreetingRequ
 	}, nil
 }
 
-func getRandomGreeting(language pb.Language) string {
-	// Define greetings per language
-	greetings := map[pb.Language][]string{
-		pb.Language_EN:    {"Hello", "Hi", "Hey", "Greetings"},
-		pb.Language_EN_GB: {"Hello", "Hiya", "Cheers", "Greetings"},
-		pb.Language_ES:    {"Hola", "Qué tal", "Buenos días", "Saludos"},
-		pb.Language_FR:    {"Bonjour", "Salut", "Coucou", "Bienvenue"},
-	}
+// Define greetings per language
+var greetingData = map[pb.Language][]string{
+	pb.Language_EN:    {"Hello", "Hi", "Hey", "Greetings"},
+	pb.Language_EN_GB: {"Hello", "Hiya", "Cheers", "Greetings"},
+	pb.Language_ES:    {"Hola", "Qué tal", "Buenos días", "Saludos"},
+	pb.Language_FR:    {"Bonjour", "Salut", "Coucou", "Bienvenue"},
+}
 
-	// Randomly select one greeting for the given language
-	return greetings[language][rand.Intn(len(greetings[language]))]
+// Randomly select one greeting for the given language
+func getRandomGreeting(language pb.Language) string {
+	greetings := greetingData[language]
+
+	return greetings[rand.Intn(len(greetings))]
 }
