@@ -2,7 +2,6 @@ package greetings
 
 import (
 	"context"
-	"log"
 	"math/rand"
 	"time"
 
@@ -29,11 +28,14 @@ func (h *greetingServiceHandler) Fetch(ctx context.Context, req *pb.GreetingRequ
 		return nil, status.Error(codes.InvalidArgument, "request cannot be nil")
 	}
 
-	log.Printf("Received request for language: %v", req.Language)
-
 	// Default to English if language is not specified
 	language := req.Language
 	if language == pb.Language_UNKNOWN {
+		language = pb.Language_EN
+	}
+
+	_, exists := greetingData[language]
+	if !exists {
 		language = pb.Language_EN
 	}
 
