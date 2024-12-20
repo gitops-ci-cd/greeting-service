@@ -2,6 +2,7 @@ package telemetry
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"time"
@@ -16,26 +17,24 @@ func LoggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 	start := time.Now()
 
 	if slog.Default().Enabled(ctx, slog.LevelDebug) {
-		slog.Debug("Proof of change")
-		reqJSON := "{}"
 		if protoMsg, ok := req.(proto.Message); ok {
-			// Use the MarshalOptions to ensure deterministic and comprehensive output
 			marshaler := protojson.MarshalOptions{
 				AllowPartial:    true,
 				EmitUnpopulated: true,
 				UseProtoNames:   true,
 			}
 			if bytes, err := marshaler.Marshal(protoMsg); err == nil {
-				reqJSON = string(bytes)
+				// Parse the JSON to avoid escaping
+				var parsedJSON map[string]interface{}
+				if err := json.Unmarshal(bytes, &parsedJSON); err == nil {
+					slog.Debug("Incoming gRPC request", "method", info.FullMethod, "type", fmt.Sprintf("%T", req), "request", parsedJSON)
+				} else {
+					slog.Error("Failed to unmarshal JSON", "error", err)
+				}
 			} else {
-				slog.Error("Failed to marshal Protobuf message", "method", info.FullMethod, "error", err, "type", fmt.Sprintf("%T", req))
+				slog.Error("Failed to marshal Protobuf message", "method", info.FullMethod, "type", fmt.Sprintf("%T", req), "error", err)
 			}
-		} else {
-			slog.Warn("Received non-Protobuf message", "method", info.FullMethod, "type", fmt.Sprintf("%T", req))
 		}
-
-		// Log the incoming request
-		slog.Debug("Incoming gRPC request", "method", info.FullMethod, "type", fmt.Sprintf("%T", req), "request", reqJSON)
 	}
 
 	// Process the request
