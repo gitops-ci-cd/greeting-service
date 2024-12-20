@@ -1,6 +1,8 @@
 package services
 
 import (
+	"log/slog"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
@@ -15,4 +17,8 @@ func Register(server *grpc.Server) {
 
 	// Register reflection service for debugging
 	reflection.Register(server)
+
+	for key := range server.GetServiceInfo() {
+		slog.Info("Service registered", "service", key)
+	}
 }
