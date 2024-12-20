@@ -2,7 +2,7 @@ package telemetry
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -17,13 +17,17 @@ func LoggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 
 	// Marshal the request to JSON
 	if slog.Default().Enabled(ctx, slog.LevelDebug) {
-		log.Printf("INTERCEPTOR: Request: %v", req)
-		reqJSON, err := protojson.Marshal(req.(proto.Message))
-		if err != nil {
-			slog.Error("Failed to marshal request", "error", err)
-			reqJSON = []byte("{}")
+		reqProto, ok := req.(proto.Message)
+		if !ok {
+			slog.Warn("Request is not a proto.Message", "type", fmt.Sprintf("%T", req))
+		} else {
+			reqJSON, err := protojson.Marshal(reqProto)
+			if err != nil {
+				slog.Error("Failed to marshal request", "error", err)
+			} else {
+				slog.Debug("Incoming gRPC request", "method", info.FullMethod, "request", string(reqJSON))
+			}
 		}
-		slog.Debug("Incoming gRPC request", "method", info.FullMethod, "request", string(reqJSON))
 	}
 
 	// Process the request
