@@ -101,7 +101,7 @@ func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 		if err != nil {
 			slog.Debug("Failed to marshal request to JSON", "error", err)
 		} else {
-			slog.Debug("gRPC request received", "method", info.FullMethod, "request", reqJSON)
+			slog.Debug("gRPC request received", "method", info.FullMethod, "request", string(reqJSON))
 		}
 	}
 
