@@ -16,14 +16,25 @@ func LoggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 	start := time.Now()
 
 	if slog.Default().Enabled(ctx, slog.LevelDebug) {
-		reqJSON := "{}" // Default empty JSON
+		slog.Debug("Proof of change")
+		reqJSON := "{}"
 		if protoMsg, ok := req.(proto.Message); ok {
-			if bytes, err := protojson.Marshal(protoMsg); err == nil {
+			// Use the MarshalOptions to ensure deterministic and comprehensive output
+			marshaler := protojson.MarshalOptions{
+				AllowPartial:    true,
+				EmitUnpopulated: true,
+				UseProtoNames:   true,
+			}
+			if bytes, err := marshaler.Marshal(protoMsg); err == nil {
 				reqJSON = string(bytes)
 			} else {
-				slog.Error("Failed to marshal request to JSON", "method", info.FullMethod, "type", fmt.Sprintf("%T", req), "error", err)
+				slog.Error("Failed to marshal Protobuf message", "method", info.FullMethod, "error", err, "type", fmt.Sprintf("%T", req))
 			}
+		} else {
+			slog.Warn("Received non-Protobuf message", "method", info.FullMethod, "type", fmt.Sprintf("%T", req))
 		}
+
+		// Log the incoming request
 		slog.Debug("Incoming gRPC request", "method", info.FullMethod, "type", fmt.Sprintf("%T", req), "request", reqJSON)
 	}
 
