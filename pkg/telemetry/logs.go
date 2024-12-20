@@ -16,29 +16,21 @@ func LoggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 	start := time.Now()
 
 	if slog.Default().Enabled(ctx, slog.LevelDebug) {
-		// Check the type of req
-		slog.Debug("Inspecting req type", "type", fmt.Sprintf("%T", req))
-
-		// Log raw req value
-		slog.Debug("Raw req value", "value", req)
-
-		// Attempt reflection if req is a ProtoMessage
-		if msg, ok := req.(protoreflect.ProtoMessage); ok {
-			reqFields := make(map[string]interface{})
-			msg.ProtoReflect().Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
-				slog.Debug("Inspecting field", "name", fd.Name(), "value", v.Interface())
-				reqFields[string(fd.Name())] = v.Interface()
-				return true
-			})
-
-			reqDetailsBytes, err := json.Marshal(reqFields)
-			if err != nil {
-				slog.Error("Error marshaling request fields", "method", info.FullMethod, "error", err)
-			} else if slog.Default().Enabled(ctx, slog.LevelDebug) {
-				slog.Debug("Incoming gRPC request", "method", info.FullMethod, "request", string(reqDetailsBytes))
+		msg := req.(protoreflect.ProtoMessage)
+		fields := make(map[string]interface{})
+		msg.ProtoReflect().Range(func(fd protoreflect.FieldDescriptor, value protoreflect.Value) bool {
+			// Only include fields that are set
+			if value.IsValid() {
+				fields[string(fd.Name())] = value.Interface()
 			}
+			return true
+		})
+
+		fieldsJSON, err := json.Marshal(fields)
+		if err != nil {
+			slog.Error("Failed to marshal request fields", "error", err)
 		} else {
-			slog.Warn("Req does not implement protoreflect.ProtoMessage", "type", fmt.Sprintf("%T", req))
+			slog.Debug("Incoming gRPC request", "method", info.FullMethod, "type", fmt.Sprintf("%T", req), "request", string(fieldsJSON))
 		}
 	}
 
