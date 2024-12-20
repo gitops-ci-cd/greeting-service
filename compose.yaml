@@ -37,6 +37,9 @@ services:
           path: ./internal/
           target: /usr/src/app/internal/
         - action: sync+restart
+          path: ./pkg/
+          target: /usr/src/app/pkg/
+        - action: sync+restart
           path: ./go.mod
           target: /usr/src/app/go.mod
         - action: sync+restart
@@ -44,6 +47,8 @@ services:
           target: /usr/src/app/go.sum
     volumes:
       - gomod:/go/pkg/mod:cached
+    depends_on:
+      - install
 
   protoc:
     profiles: [tasks]

@@ -16,6 +16,7 @@ func LoggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 	start := time.Now()
 
 	if slog.Default().Enabled(ctx, slog.LevelDebug) {
+		// Log the incoming request
 		if protoMsg, ok := req.(proto.Message); ok {
 			marshaler := protojson.MarshalOptions{
 				AllowPartial:    true,

@@ -17,12 +17,20 @@ type greetingServiceHandler struct {
 	pb.UnimplementedGreetingServiceServer // Embedding for forward compatibility
 }
 
+// Define greetings per language
+var greetingData = map[pb.Language][]string{
+	pb.Language_EN:    {"Hello", "Hi", "Hey", "Greetings"},
+	pb.Language_EN_GB: {"Hello", "Hiya", "Cheers", "Greetings"},
+	pb.Language_ES:    {"Hola", "Qué tal", "Buenos días", "Saludos"},
+	pb.Language_FR:    {"Bonjour", "Salut", "Coucou", "Bienvenue"},
+}
+
 // NewGreetingServiceHandler creates a new instance of greetingServiceHandler.
 func NewGreetingServiceHandler() pb.GreetingServiceServer {
 	return &greetingServiceHandler{}
 }
 
-// Fetch handles an RPC request for a greeting.
+// Fetch handles an RPC request
 func (h *greetingServiceHandler) Fetch(ctx context.Context, req *pb.GreetingRequest) (*pb.GreetingResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "request cannot be nil")
@@ -45,14 +53,6 @@ func (h *greetingServiceHandler) Fetch(ctx context.Context, req *pb.GreetingRequ
 		Greeting:  getRandomGreeting(language),
 		Timestamp: timestamppb.New(time.Now()),
 	}, nil
-}
-
-// Define greetings per language
-var greetingData = map[pb.Language][]string{
-	pb.Language_EN:    {"Hello", "Hi", "Hey", "Greetings"},
-	pb.Language_EN_GB: {"Hello", "Hiya", "Cheers", "Greetings"},
-	pb.Language_ES:    {"Hola", "Qué tal", "Buenos días", "Saludos"},
-	pb.Language_FR:    {"Bonjour", "Salut", "Coucou", "Bienvenue"},
 }
 
 // Randomly select one greeting for the given language

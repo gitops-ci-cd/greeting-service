@@ -12,7 +12,6 @@ import (
 
 // Register registers all gRPC service handlers and debugging capabilities with the server
 func Register(server *grpc.Server) {
-	// Register the GreetingService business logic
 	pb.RegisterGreetingServiceServer(server, greetings.NewGreetingServiceHandler())
 
 	// Register reflection service for debugging

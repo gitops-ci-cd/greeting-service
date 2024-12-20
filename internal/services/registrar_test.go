@@ -13,7 +13,7 @@ func TestRegister(t *testing.T) {
 	// Call the Register function
 	Register(server)
 
-	// Verify that the GreetingServiceServer has been registered
+	// Verify that the services have been registered
 	serviceInfo := server.GetServiceInfo()
 	if _, ok := serviceInfo["com.acme.schema.v1.GreetingService"]; !ok {
 		t.Errorf("GreetingService not registered")
