@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"net"
 	"os"
@@ -11,10 +10,10 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 
-	pb "github.com/gitops-ci-cd/greeting-service/internal/gen/pb/v1"
-	"github.com/gitops-ci-cd/greeting-service/internal/greetings"
+	"github.com/gitops-ci-cd/greeting-service/internal/services"
 )
 
 func init() {
@@ -24,6 +23,8 @@ func init() {
 			return slog.LevelError
 		case "WARN":
 			return slog.LevelWarn
+		case "INFO":
+			return slog.LevelInfo
 		case "DEBUG":
 			return slog.LevelDebug
 		default:
@@ -42,7 +43,7 @@ func main() {
 	}
 
 	// Run the server
-	if err := run(port); err != nil {
+	if err := run(port, services.Register); err != nil {
 		slog.Error("Server terminated", "error", err)
 		os.Exit(1)
 	} else {
@@ -51,7 +52,7 @@ func main() {
 }
 
 // run sets up and starts the gRPC server
-func run(port string) error {
+func run(port string, registerFunc func(*grpc.Server)) error {
 	// Create a TCP listener
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
@@ -65,8 +66,8 @@ func run(port string) error {
 		grpc.UnaryInterceptor(loggingInterceptor),
 	)
 
-	// Register services and reflection
-	registerServices(server)
+	// Register services using the provided function
+	registerFunc(server)
 
 	// Handle graceful shutdown
 	ctx, cancel := context.WithCancel(context.Background())
@@ -94,7 +95,15 @@ func run(port string) error {
 func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	start := time.Now()
 
-	slog.Debug("gRPC request received", "method", info.FullMethod, "request", fmt.Sprintf("%+v", req),)
+	if protoReq, ok := req.(proto.Message); ok {
+		// Serialize protobuf message to JSON for logging
+		reqJSON, err := protojson.Marshal(protoReq)
+		if err != nil {
+			slog.Debug("Failed to marshal request to JSON", "error", err)
+		} else {
+			slog.Debug("gRPC request received", "method", info.FullMethod, "request", reqJSON)
+		}
+	}
 
 	// Process the request
 	res, err := handler(ctx, req)
@@ -112,15 +121,6 @@ func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 	slog.Info("Handled gRPC request", fields...)
 
 	return res, err
-}
-
-// registerServices registers all gRPC service handlers and debugging capabilities with the server
-func registerServices(server *grpc.Server) {
-	// Register the GreetingService business logic
-	pb.RegisterGreetingServiceServer(server, greetings.NewGreetingServiceHandler())
-
-	// Register reflection service for debugging
-	reflection.Register(server)
 }
 
 // setupSignalHandler sets up a signal handler to cancel the provided context
