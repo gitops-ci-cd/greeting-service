@@ -3,12 +3,10 @@ package telemetry
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log/slog"
 	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
@@ -17,23 +15,20 @@ func LoggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 	start := time.Now()
 
 	if slog.Default().Enabled(ctx, slog.LevelDebug) {
-		if msg, ok := req.(proto.Message); ok {
-			// Use ProtoReflect for detailed introspection
-			reqReflect := msg.ProtoReflect()
-			fields := make(map[string]interface{})
-			reqReflect.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
-				fields[string(fd.Name())] = v.Interface()
-				return true
-			})
-			reqDetailsBytes, err := json.Marshal(fields)
-			if err != nil {
-				slog.Error("Error marshaling request fields", "method", info.FullMethod, "error", err)
-			} else {
-				slog.Debug("Incoming gRPC request", "method", info.FullMethod, "request", string(reqDetailsBytes))
-			}
-		} else {
-			// Fallback for non-Protobuf types
-			slog.Debug("Incoming gRPC request", "method", info.FullMethod, "request", fmt.Sprintf("%+v", req))
+		reqFields := make(map[string]interface{})
+		reqReflect := req.(protoreflect.ProtoMessage).ProtoReflect()
+
+		reqReflect.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
+			slog.Debug("Inspecting field", "name", fd.Name(), "value", v.Interface())
+			reqFields[string(fd.Name())] = v.Interface()
+			return true
+		})
+
+		reqDetailsBytes, err := json.Marshal(reqFields)
+		if err != nil {
+			slog.Error("Error marshaling request fields", "method", info.FullMethod, "error", err)
+		} else if slog.Default().Enabled(ctx, slog.LevelDebug) {
+			slog.Debug("Incoming gRPC request", "method", info.FullMethod, "request", string(reqDetailsBytes))
 		}
 	}
 
