@@ -2,7 +2,6 @@ package telemetry
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"time"
@@ -23,16 +22,15 @@ func LoggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 				EmitUnpopulated: true,
 				UseProtoNames:   true,
 			}
+			fields := []any{
+				"type", fmt.Sprintf("%T", req),
+			}
 			if bytes, err := marshaler.Marshal(protoMsg); err == nil {
-				// Parse the JSON to avoid escaping
-				var parsedJSON map[string]interface{}
-				if err := json.Unmarshal(bytes, &parsedJSON); err == nil {
-					slog.Debug("Incoming gRPC request", "method", info.FullMethod, "type", fmt.Sprintf("%T", req), "request", parsedJSON)
-				} else {
-					slog.Error("Failed to unmarshal JSON", "error", err)
-				}
+				fields = append(fields, "request", string(bytes))
+				slog.Debug("Incoming gRPC request", fields...)
 			} else {
-				slog.Error("Failed to marshal Protobuf message", "method", info.FullMethod, "type", fmt.Sprintf("%T", req), "error", err)
+				fields = append(fields, "error", err)
+				slog.Error("Failed to marshal Protobuf message", fields...)
 			}
 		}
 	}
