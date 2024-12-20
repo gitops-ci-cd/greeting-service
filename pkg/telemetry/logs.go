@@ -3,6 +3,7 @@ package telemetry
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -15,20 +16,29 @@ func LoggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 	start := time.Now()
 
 	if slog.Default().Enabled(ctx, slog.LevelDebug) {
-		reqFields := make(map[string]interface{})
-		reqReflect := req.(protoreflect.ProtoMessage).ProtoReflect()
+		// Check the type of req
+		slog.Debug("Inspecting req type", "type", fmt.Sprintf("%T", req))
 
-		reqReflect.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
-			slog.Debug("Inspecting field", "name", fd.Name(), "value", v.Interface())
-			reqFields[string(fd.Name())] = v.Interface()
-			return true
-		})
+		// Log raw req value
+		slog.Debug("Raw req value", "value", req)
 
-		reqDetailsBytes, err := json.Marshal(reqFields)
-		if err != nil {
-			slog.Error("Error marshaling request fields", "method", info.FullMethod, "error", err)
-		} else if slog.Default().Enabled(ctx, slog.LevelDebug) {
-			slog.Debug("Incoming gRPC request", "method", info.FullMethod, "request", string(reqDetailsBytes))
+		// Attempt reflection if req is a ProtoMessage
+		if msg, ok := req.(protoreflect.ProtoMessage); ok {
+			reqFields := make(map[string]interface{})
+			msg.ProtoReflect().Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
+				slog.Debug("Inspecting field", "name", fd.Name(), "value", v.Interface())
+				reqFields[string(fd.Name())] = v.Interface()
+				return true
+			})
+
+			reqDetailsBytes, err := json.Marshal(reqFields)
+			if err != nil {
+				slog.Error("Error marshaling request fields", "method", info.FullMethod, "error", err)
+			} else if slog.Default().Enabled(ctx, slog.LevelDebug) {
+				slog.Debug("Incoming gRPC request", "method", info.FullMethod, "request", string(reqDetailsBytes))
+			}
+		} else {
+			slog.Warn("Req does not implement protoreflect.ProtoMessage", "type", fmt.Sprintf("%T", req))
 		}
 	}
 
