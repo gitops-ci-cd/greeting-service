@@ -95,14 +95,14 @@ func run(port string, registerFunc func(*grpc.Server)) error {
 func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	start := time.Now()
 
-	if protoReq, ok := req.(proto.Message); ok {
-		// Serialize protobuf message to JSON for logging
-		reqJSON, err := protojson.Marshal(protoReq)
+	// Marshal the request to JSON
+	if slog.Default().Enabled(ctx, slog.LevelDebug) {
+		reqJSON, err := protojson.Marshal(req.(proto.Message))
 		if err != nil {
-			slog.Debug("Failed to marshal request to JSON", "error", err)
-		} else {
-			slog.Debug("gRPC request received", "method", info.FullMethod, "request", string(reqJSON))
+			slog.Error("Failed to marshal request", "error", err)
+			reqJSON = []byte("{}")
 		}
+		slog.Debug("Incoming gRPC request", "method", info.FullMethod, "request", string(reqJSON))
 	}
 
 	// Process the request
