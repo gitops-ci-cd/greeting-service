@@ -29,7 +29,9 @@ func (h *greetingServiceHandler) Fetch(ctx context.Context, req *pb.GreetingRequ
 		return nil, status.Error(codes.InvalidArgument, "request cannot be nil")
 	}
 
-	log.Printf("HANDLER: Request: %v", req)
+	// Debugging...
+	log.Printf("HANDLER: req: %v", req)
+	log.Printf("HANDLER: req.Language: %v", req.Language)
 
 	// Default to English if language is explicitly UNKNOWN
 	language := req.Language
