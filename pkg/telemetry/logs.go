@@ -2,13 +2,13 @@ package telemetry
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 // loggingInterceptor logs all incoming gRPC requests
@@ -16,22 +16,15 @@ func LoggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 	start := time.Now()
 
 	if slog.Default().Enabled(ctx, slog.LevelDebug) {
-		msg := req.(protoreflect.ProtoMessage)
-		fields := make(map[string]interface{})
-		msg.ProtoReflect().Range(func(fd protoreflect.FieldDescriptor, value protoreflect.Value) bool {
-			// Only include fields that are set
-			if value.IsValid() {
-				fields[string(fd.Name())] = value.Interface()
+		reqJSON := "{}" // Default empty JSON
+		if protoMsg, ok := req.(proto.Message); ok {
+			if bytes, err := protojson.Marshal(protoMsg); err == nil {
+				reqJSON = string(bytes)
+			} else {
+				slog.Error("Failed to marshal request to JSON", "method", info.FullMethod, "type", fmt.Sprintf("%T", req), "error", err)
 			}
-			return true
-		})
-
-		fieldsJSON, err := json.Marshal(fields)
-		if err != nil {
-			slog.Error("Failed to marshal request fields", "error", err)
-		} else {
-			slog.Debug("Incoming gRPC request", "method", info.FullMethod, "type", fmt.Sprintf("%T", req), "request", string(fieldsJSON))
 		}
+		slog.Debug("Incoming gRPC request", "method", info.FullMethod, "type", fmt.Sprintf("%T", req), "request", reqJSON)
 	}
 
 	// Process the request
