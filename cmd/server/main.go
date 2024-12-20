@@ -2,21 +2,19 @@ package main
 
 import (
 	"context"
-	"log"
 	"log/slog"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 
 	"github.com/gitops-ci-cd/greeting-service/internal/services"
+	"github.com/gitops-ci-cd/greeting-service/pkg/telemetry"
 )
 
+// Configure the logger
 func init() {
 	level := func() slog.Level {
 		switch os.Getenv("LOG_LEVEL") {
@@ -37,6 +35,7 @@ func init() {
 	})))
 }
 
+// main is the entry point for the server
 func main() {
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
@@ -64,7 +63,7 @@ func run(port string, registerFunc func(*grpc.Server)) error {
 
 	// Create a new gRPC server
 	server := grpc.NewServer(
-		grpc.UnaryInterceptor(loggingInterceptor),
+		grpc.UnaryInterceptor(telemetry.LoggingInterceptor),
 	)
 
 	// Register services using the provided function
@@ -90,39 +89,6 @@ func run(port string, registerFunc func(*grpc.Server)) error {
 	server.GracefulStop()
 
 	return nil
-}
-
-// loggingInterceptor logs all incoming gRPC requests
-func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	start := time.Now()
-
-	// Marshal the request to JSON
-	if slog.Default().Enabled(ctx, slog.LevelDebug) {
-		log.Printf("Request: %v", req)
-		reqJSON, err := protojson.Marshal(req.(proto.Message))
-		if err != nil {
-			slog.Error("Failed to marshal request", "error", err)
-			reqJSON = []byte("{}")
-		}
-		slog.Debug("Incoming gRPC request", "method", info.FullMethod, "request", string(reqJSON))
-	}
-
-	// Process the request
-	res, err := handler(ctx, req)
-	duration := time.Since(start)
-
-	fields := []any{
-		"method", info.FullMethod,
-		"duration", duration.String(),
-	}
-
-	if err != nil {
-		fields = append(fields, "error", err)
-	}
-
-	slog.Info("Handled gRPC request", fields...)
-
-	return res, err
 }
 
 // setupSignalHandler sets up a signal handler to cancel the provided context
