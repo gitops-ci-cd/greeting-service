@@ -51,9 +51,9 @@ services:
     command:
       - --proto_path=./proto
       - --go_opt=module=github.com/gitops-ci-cd/schema
-      - --go_out=./internal/gen/pb
+      - --go_out=./internal/_gen/pb
       - --go-grpc_opt=module=github.com/gitops-ci-cd/schema
-      - --go-grpc_out=./internal/gen/pb
+      - --go-grpc_out=./internal/_gen/pb
       - ./proto/com/acme/schema/v1/greeting.proto
     volumes:
       - .:/usr/src/app:delegated
