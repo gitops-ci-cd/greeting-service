@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"log/slog"
 	"net"
 	"os"
@@ -97,6 +98,7 @@ func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 
 	// Marshal the request to JSON
 	if slog.Default().Enabled(ctx, slog.LevelDebug) {
+		log.Printf("Request: %v", req)
 		reqJSON, err := protojson.Marshal(req.(proto.Message))
 		if err != nil {
 			slog.Error("Failed to marshal request", "error", err)
