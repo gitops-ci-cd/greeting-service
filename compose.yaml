@@ -46,6 +46,7 @@ services:
       - gomod:/go/pkg/mod:cached
 
   protoc:
+    profiles: [tasks]
     image: ghcr.io/gitops-ci-cd/protoc:latest
     entrypoint: protoc
     command:
@@ -60,14 +61,17 @@ services:
 
   install:
     <<: *go
+    profiles: [tasks]
     command: mod tidy
 
   lint:
     <<: *go
+    profiles: [tasks]
     command: vet ./...
 
   test:
     <<: *go
+    profiles: [tasks]
     command: test ./...
 
 volumes:

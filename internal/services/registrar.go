@@ -18,7 +18,7 @@ func Register(server *grpc.Server) {
 	// Register reflection service for debugging
 	reflection.Register(server)
 
-	for key := range server.GetServiceInfo() {
-		slog.Info("Service registered", "service", key)
+	for key, value := range server.GetServiceInfo() {
+		slog.Info("Service registered", "service", key, "methods", value.Methods, "metadata", value.Metadata)
 	}
 }

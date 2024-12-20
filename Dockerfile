@@ -9,8 +9,7 @@ RUN go mod download
 # If you have vendoring:
 # RUN go mod vendor
 
-# DO NOT copy the rest of the source here for development.
-# Rely on the volume mount instead.
+COPY . ./
 
 # This stage compiles the binary.
 FROM golang:1.23 AS builder
@@ -19,7 +18,6 @@ WORKDIR /usr/src/app
 # Copy dependencies from the deps stage.
 COPY --from=deps /go/pkg /go/pkg
 
-# Now copy the rest of the source code.
 COPY . ./
 
 # Create a non-root user and group to run the application.
