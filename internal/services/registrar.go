@@ -4,7 +4,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	pb "github.com/gitops-ci-cd/greeting-service/internal/gen/pb/v1"
+	pb "github.com/gitops-ci-cd/greeting-service/internal/_gen/pb/v1"
 	"github.com/gitops-ci-cd/greeting-service/internal/greetings"
 )
 

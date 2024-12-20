@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	pb "github.com/gitops-ci-cd/greeting-service/internal/gen/pb/v1"
+	pb "github.com/gitops-ci-cd/greeting-service/internal/_gen/pb/v1"
 )
 
 // greetingServiceHandler implements the GreetingServiceServer interface.
