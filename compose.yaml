@@ -47,8 +47,6 @@ services:
           target: /usr/src/app/go.sum
     volumes:
       - gomod:/go/pkg/mod:cached
-    depends_on:
-      - install
 
   protoc:
     profiles: [tasks]
