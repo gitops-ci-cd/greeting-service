@@ -9,7 +9,7 @@ import (
 )
 
 func TestFetch_ValidRequest(t *testing.T) {
-	handler := NewGreetingServiceHandler()
+	handler := &GreetingServiceHandler{}
 
 	// Define test cases
 	tests := []struct {

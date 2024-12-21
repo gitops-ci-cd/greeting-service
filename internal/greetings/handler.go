@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"time"
 
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -12,8 +13,8 @@ import (
 	pb "github.com/gitops-ci-cd/greeting-service/internal/_gen/pb/v1"
 )
 
-// greetingServiceHandler implements the GreetingServiceServer interface.
-type greetingServiceHandler struct {
+// GreetingServiceHandler implements the GreetingServiceServer interface.
+type GreetingServiceHandler struct {
 	pb.UnimplementedGreetingServiceServer // Embedding for forward compatibility
 }
 
@@ -25,13 +26,13 @@ var greetingData = map[pb.Language][]string{
 	pb.Language_FR:    {"Bonjour", "Salut", "Coucou", "Bienvenue"},
 }
 
-// NewGreetingServiceHandler creates a new instance of greetingServiceHandler.
-func NewGreetingServiceHandler() pb.GreetingServiceServer {
-	return &greetingServiceHandler{}
+// Register registers the GreetingService with the given gRPC server.
+func (h *GreetingServiceHandler) Register(server *grpc.Server) {
+	pb.RegisterGreetingServiceServer(server, h)
 }
 
 // Fetch handles an RPC request
-func (h *greetingServiceHandler) Fetch(ctx context.Context, req *pb.GreetingRequest) (*pb.GreetingResponse, error) {
+func (h *GreetingServiceHandler) Fetch(ctx context.Context, req *pb.GreetingRequest) (*pb.GreetingResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "request cannot be nil")
 	}

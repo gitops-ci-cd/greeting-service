@@ -1,11 +1,9 @@
-package main
+package io
 
 import (
 	"net"
 	"testing"
 	"time"
-
-	"google.golang.org/grpc"
 )
 
 func TestRun(t *testing.T) {
@@ -21,12 +19,10 @@ func TestRun(t *testing.T) {
 	// Give the dummy server time to fully bind
 	time.Sleep(100 * time.Millisecond)
 
-	mockRegisterFunc := func(server *grpc.Server) {
-		// Do nothing
-	}
+	mockServer := new(Server)
 
 	// Call the function under test
-	err = run(port, mockRegisterFunc)
+	err = Run(port, *mockServer)
 	if err == nil {
 		t.Errorf("Expected run() to fail when the port is already in use")
 	}
