@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net"
 	"os"
@@ -56,7 +57,7 @@ func run(port string, registerFunc func(*grpc.Server)) error {
 	// Create a TCP listener
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create tcp listener on port %s: %w", port, err)
 	}
 	defer listener.Close()
 
