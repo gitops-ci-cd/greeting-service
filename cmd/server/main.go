@@ -11,8 +11,6 @@ import (
 	"github.com/gitops-ci-cd/greeting-service/pkg/telemetry"
 )
 
-const defaultPort = "50051"
-
 // Configure the logger
 func init() {
 	level := func() slog.Level {
@@ -33,6 +31,8 @@ func init() {
 		Level: level,
 	})))
 }
+
+const defaultPort = "50051"
 
 // main is the entry point for the server
 func main() {
