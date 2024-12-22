@@ -48,7 +48,7 @@ func main() {
 
 	// Create and populate the registry with gRPC services that satisfy the io.Registerable interface
 	registry := &io.Registry{}
-	registry.Add(&greetings.GreetingServiceHandler{})
+	registry.Add(&greetings.Handler{Service: &greetings.Service{}})
 	registry.RegisterAll(server)
 
 	if err := io.Run(":"+port, server); err != nil {

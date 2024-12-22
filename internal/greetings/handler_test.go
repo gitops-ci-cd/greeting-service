@@ -5,58 +5,88 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	pb "github.com/gitops-ci-cd/greeting-service/internal/_gen/pb/v1"
 )
 
-func TestFetch_ValidRequest(t *testing.T) {
-	handler := &GreetingServiceHandler{}
+type mockService struct{}
 
-	// Define test cases
+func (m *mockService) Lookup(language pb.Language) (pb.Language, string) {
+	// Mock response based on input language
+	switch language {
+	case pb.Language_EN:
+		return pb.Language_EN, "Hello"
+	case pb.Language_EN_GB:
+		return pb.Language_EN_GB, "Hiya"
+	default:
+		return pb.Language_EN, "Hello"
+	}
+}
+
+func TestHandlerFetch(t *testing.T) {
+	mockSvc := &mockService{}
+	handler := &Handler{Service: mockSvc}
+
 	tests := []struct {
-		name             string
-		language         pb.Language
-		expectedLanguage pb.Language
+		name     string
+		req      *pb.GreetingRequest
+		wantResp *pb.GreetingResponse
+		wantErr  codes.Code
 	}{
 		{
-			name:             "English",
-			language:         pb.Language_EN,
-			expectedLanguage: pb.Language_EN,
+			name: "Valid English request",
+			req: &pb.GreetingRequest{
+				Language: pb.Language_EN,
+			},
+			wantResp: &pb.GreetingResponse{
+				Language:  pb.Language_EN,
+				Greeting:  "Hello",
+				Timestamp: timestamppb.New(time.Now()),
+			},
+			wantErr: codes.OK,
 		},
 		{
-			name:             "British English",
-			language:         pb.Language_EN_GB,
-			expectedLanguage: pb.Language_EN_GB,
+			name: "Valid British English request",
+			req: &pb.GreetingRequest{
+				Language: pb.Language_EN_GB,
+			},
+			wantResp: &pb.GreetingResponse{
+				Language:  pb.Language_EN_GB,
+				Greeting:  "Hiya",
+				Timestamp: timestamppb.New(time.Now()),
+			},
+			wantErr: codes.OK,
 		},
 		{
-			name:             "Unknown language",
-			language:         pb.Language_UNKNOWN,
-			expectedLanguage: pb.Language_EN,
+			name:    "Nil request",
+			req:     nil,
+			wantErr: codes.InvalidArgument,
 		},
-		{
-			name:             "Unrecognized language",
-			language:         999,
-			expectedLanguage: pb.Language_EN,
-		},
-		// Add other cases...
 	}
 
-	// Iterate over test cases
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			req := &pb.GreetingRequest{Language: tc.language}
+			resp, err := handler.Fetch(context.Background(), tc.req)
 
-			// Call the method under test
-			resp, err := handler.Fetch(context.Background(), req)
+			// Validate error code
+			if status.Code(err) != tc.wantErr {
+				t.Errorf("got error code %v, want %v", status.Code(err), tc.wantErr)
+			}
 
-			// Validate the response
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if resp.Language != tc.expectedLanguage {
-				t.Errorf("got language %v, want %v", resp.Language, tc.expectedLanguage)
-			}
-			if time.Since(resp.Timestamp.AsTime()) > time.Second {
-				t.Errorf("timestamp is too old: %v", resp.Timestamp.AsTime())
+			// Validate response if no error
+			if tc.wantErr == codes.OK {
+				if resp.Language != tc.wantResp.Language {
+					t.Errorf("got language %v, want %v", resp.Language, tc.wantResp.Language)
+				}
+				if resp.Greeting != tc.wantResp.Greeting {
+					t.Errorf("got greeting %v, want %v", resp.Greeting, tc.wantResp.Greeting)
+				}
+				if time.Since(resp.Timestamp.AsTime()) > time.Second {
+					t.Errorf("timestamp is too old: got %v", resp.Timestamp.AsTime())
+				}
 			}
 		})
 	}
