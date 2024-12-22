@@ -2,12 +2,10 @@ package greetings
 
 import (
 	"context"
-	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
 
 	pb "github.com/gitops-ci-cd/greeting-service/internal/_gen/pb/v1"
 )
@@ -35,6 +33,5 @@ func (h *Handler) Fetch(ctx context.Context, req *pb.GreetingRequest) (*pb.Greet
 	return &pb.GreetingResponse{
 		Language:  language,
 		Greeting:  greeting,
-		Timestamp: timestamppb.New(time.Now()),
 	}, nil
 }

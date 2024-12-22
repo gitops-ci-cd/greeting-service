@@ -42,7 +42,10 @@ func main() {
 	}
 
 	opts := []grpc.ServerOption{
-		grpc.UnaryInterceptor(telemetry.LoggingInterceptor),
+		grpc.ChainUnaryInterceptor(
+			io.TimestampInjector,
+			telemetry.LoggingInterceptor,
+		),
 	}
 	server := grpc.NewServer(opts...)
 

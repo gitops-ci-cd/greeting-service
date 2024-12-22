@@ -3,11 +3,9 @@ package greetings
 import (
 	"context"
 	"testing"
-	"time"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
 
 	pb "github.com/gitops-ci-cd/greeting-service/internal/_gen/pb/v1"
 )
@@ -44,7 +42,6 @@ func TestHandlerFetch(t *testing.T) {
 			wantResp: &pb.GreetingResponse{
 				Language:  pb.Language_EN,
 				Greeting:  "Hello",
-				Timestamp: timestamppb.New(time.Now()),
 			},
 			wantErr: codes.OK,
 		},
@@ -56,7 +53,6 @@ func TestHandlerFetch(t *testing.T) {
 			wantResp: &pb.GreetingResponse{
 				Language:  pb.Language_EN_GB,
 				Greeting:  "Hiya",
-				Timestamp: timestamppb.New(time.Now()),
 			},
 			wantErr: codes.OK,
 		},
@@ -83,9 +79,6 @@ func TestHandlerFetch(t *testing.T) {
 				}
 				if resp.Greeting != tc.wantResp.Greeting {
 					t.Errorf("got greeting %v, want %v", resp.Greeting, tc.wantResp.Greeting)
-				}
-				if time.Since(resp.Timestamp.AsTime()) > time.Second {
-					t.Errorf("timestamp is too old: got %v", resp.Timestamp.AsTime())
 				}
 			}
 		})
