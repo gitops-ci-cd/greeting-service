@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
@@ -34,6 +35,10 @@ func LoggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 				slog.Error("Failed to marshal Protobuf message", fields...)
 			}
 		}
+
+		// Log the incoming context
+		md, _ := metadata.FromIncomingContext(ctx)
+		slog.Debug("Incoming gRPC context", "metadata", md)
 	}
 
 	// Process the request
