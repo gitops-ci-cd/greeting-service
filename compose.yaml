@@ -1,5 +1,6 @@
 services:
   go: &go
+    profiles: [tasks]
     env_file:
       - path: .env
         required: false
