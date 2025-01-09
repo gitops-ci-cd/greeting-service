@@ -34,7 +34,7 @@ func init() {
 
 const defaultPort = "50051"
 
-// main is the entry point for the server
+// main is the entrypoint for the server
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
