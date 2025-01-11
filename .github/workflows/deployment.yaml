@@ -24,7 +24,7 @@ jobs:
     name: Deploy
     strategy:
       matrix:
-        target: [production, sandbox]
+        target: [local]
     uses: gitops-ci-cd/.github/.github/workflows/deploy.yaml@main
     with:
       environment: ${{ matrix.target }}
