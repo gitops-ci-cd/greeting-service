@@ -41,7 +41,6 @@ func LoggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 		slog.Debug("Incoming gRPC context", "metadata", md)
 	}
 
-	// Process the request
 	res, err := handler(ctx, req)
 	duration := time.Since(start)
 
