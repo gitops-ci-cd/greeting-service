@@ -3,7 +3,7 @@ module github.com/gitops-ci-cd/greeting-service
 go 1.23.4
 
 require (
-	google.golang.org/grpc v1.72.1
+	google.golang.org/grpc v1.72.2
 	google.golang.org/protobuf v1.36.6
 )
 
