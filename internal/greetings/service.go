@@ -36,6 +36,9 @@ func (s *Service) Lookup(preferredLanguage pb.Language) (language pb.Language, g
 		language = pb.Language_EN
 	}
 
+	// TESTING
+	language = pb.Language_FR
+
 	return language, getRandomGreeting(language)
 }
 
